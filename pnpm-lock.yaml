@@ -24,9 +24,6 @@ importers:
       '@types/node':
         specifier: ^20.10.0
         version: 20.19.32
-      '@types/sharp':
-        specifier: ^0.32.0
-        version: 0.32.0
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -411,10 +408,6 @@ packages:
   '@types/node@20.19.32':
     resolution: {integrity: sha512-Ez8QE4DMfhjjTsES9K2dwfV258qBui7qxUsoaixZDiTzbde4U12e1pXGNu/ECsUIOi5/zoCxAQxIhQnaUQ2VvA==}
 
-  '@types/sharp@0.32.0':
-    resolution: {integrity: sha512-OOi3kL+FZDnPhVzsfD37J88FNeZh6gQsGcLc95NbeURRGvmSjeXiDcyWzF2o3yh/gQAUn2uhh/e+CPCa5nwAxw==}
-    deprecated: This is a stub types definition. sharp provides its own type definitions, so you do not need this installed.
-
   basic-ftp@5.1.0:
     resolution: {integrity: sha512-RkaJzeJKDbaDWTIPiJwubyljaEPwpVWkm9Rt5h9Nd6h7tEXTJ3VB4qxdZBioV7JO5yLUaOKwz7vDOzlncUsegw==}
     engines: {node: '>=10.0.0'}
@@ -693,10 +686,6 @@ snapshots:
   '@types/node@20.19.32':
     dependencies:
       undici-types: 6.21.0
-
-  '@types/sharp@0.32.0':
-    dependencies:
-      sharp: 0.34.5
 
   basic-ftp@5.1.0: {}
 
