@@ -157,6 +157,7 @@ async function createGif(
 			pages: files.length,
 			pageHeight: height,
 		} as sharp.CreateRaw,
+		limitInputPixels: false,
 	})
 		.gif({ delay: Array(files.length).fill(delay), loop: 0 })
 		.toFile(outputPath);
