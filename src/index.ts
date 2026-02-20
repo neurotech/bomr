@@ -67,6 +67,14 @@ async function downloadRadarFrames(
 		fs.mkdirSync(DOWNLOADS_DIR, { recursive: true });
 	}
 
+	// Remove stale radar frames for this station before downloading fresh ones
+	const existingFiles = fs.readdirSync(DOWNLOADS_DIR);
+	for (const file of existingFiles) {
+		if (file.startsWith(stationId) && file.endsWith(".png")) {
+			fs.unlinkSync(path.join(DOWNLOADS_DIR, file));
+		}
+	}
+
 	const files = await client.list(RADAR_PATH);
 
 	const pngFiles = files.filter(
