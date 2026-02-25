@@ -3,7 +3,7 @@ import * as http from "node:http";
 import * as path from "node:path";
 import { CronJob } from "cron";
 import { downloadAndCreateGif, type RadarRange } from "./index";
-import { log, logError } from "./log";
+import { formatSydneyTime, log, logError } from "./log";
 
 const PORT = 7777;
 const RADAR_RANGE: RadarRange = "512km";
@@ -213,7 +213,7 @@ async function main(): Promise<void> {
 
 	// Update next generation time
 	state.nextGeneration = cronJob.nextDate().toJSDate();
-	log(`Next scheduled generation: ${state.nextGeneration.toISOString()}`);
+	log(`Next scheduled generation: ${formatSydneyTime(state.nextGeneration)}`);
 
 	// Start HTTP server
 	const server = http.createServer(handleRequest);
