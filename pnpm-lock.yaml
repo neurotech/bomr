@@ -14,6 +14,9 @@ importers:
       cron:
         specifier: ^4.4.0
         version: 4.4.0
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
       sharp:
         specifier: ^0.34.5
         version: 0.34.5
@@ -416,6 +419,9 @@ packages:
     resolution: {integrity: sha512-fkdfq+b+AHI4cKdhZlppHveI/mgz2qpiYxcm+t5E5TsxX7QrLS1VE0+7GENEk9z0EeGPcpSciGv6ez24duWhwQ==}
     engines: {node: '>=18.x'}
 
+  date-fns@4.1.0:
+    resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
+
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
@@ -693,6 +699,8 @@ snapshots:
     dependencies:
       '@types/luxon': 3.7.1
       luxon: 3.7.2
+
+  date-fns@4.1.0: {}
 
   detect-libc@2.1.2: {}
 

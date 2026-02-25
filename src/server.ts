@@ -3,6 +3,7 @@ import * as http from "node:http";
 import * as path from "node:path";
 import { CronJob } from "cron";
 import { downloadAndCreateGif, type RadarRange } from "./index";
+import { log, logError } from "./log";
 
 const PORT = 7777;
 const RADAR_RANGE: RadarRange = "512km";
@@ -28,24 +29,22 @@ const state: ServerState = {
 
 async function generateRadarGif(): Promise<void> {
 	if (state.isGenerating) {
-		console.log("Generation already in progress, skipping...");
+		log("Generation already in progress, skipping...");
 		return;
 	}
 
 	state.isGenerating = true;
 	state.generationError = null;
-	console.log(`[${new Date().toISOString()}] Starting radar GIF generation...`);
+	log("Starting radar GIF generation...");
 
 	try {
 		await downloadAndCreateGif(RADAR_RANGE, FRAME_DELAY);
 		state.lastGeneration = new Date();
-		console.log(`[${new Date().toISOString()}] Radar GIF generation complete`);
+		log("Radar GIF generation complete");
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : String(error);
 		state.generationError = errorMessage;
-		console.error(
-			`[${new Date().toISOString()}] Generation failed: ${errorMessage}`,
-		);
+		logError(`Generation failed: ${errorMessage}`);
 	} finally {
 		state.isGenerating = false;
 	}
@@ -73,7 +72,7 @@ function handleRequest(
 	const url = req.url || "/";
 	const method = req.method || "GET";
 
-	console.log(`[${new Date().toISOString()}] ${method} ${url}`);
+	log(`${method} ${url}`);
 
 	// Health check endpoint
 	if (url === "/health" && method === "GET") {
@@ -133,7 +132,7 @@ function handleRequest(
 		}
 
 		// Trigger generation asynchronously
-		generateRadarGif().catch(console.error);
+		generateRadarGif().catch(logError);
 
 		res.writeHead(202, { "Content-Type": "application/json" });
 		res.end(
@@ -185,18 +184,18 @@ function handleRequest(
 }
 
 async function main(): Promise<void> {
-	console.log("BOM Radar Service starting...");
-	console.log(`  Port: ${PORT}`);
-	console.log(`  Radar range: ${RADAR_RANGE}`);
-	console.log(`  Frame delay: ${FRAME_DELAY}ms`);
-	console.log(`  Schedule: ${CRON_SCHEDULE}`);
+	log("BOM Radar Service starting...");
+	log(`  Port: ${PORT}`);
+	log(`  Radar range: ${RADAR_RANGE}`);
+	log(`  Frame delay: ${FRAME_DELAY}ms`);
+	log(`  Schedule: ${CRON_SCHEDULE}`);
 
 	// Check if GIF needs to be generated on startup
 	if (!isGifFresh()) {
-		console.log("GIF is stale or missing, generating on startup...");
+		log("GIF is stale or missing, generating on startup...");
 		await generateRadarGif();
 	} else {
-		console.log("GIF is fresh, skipping initial generation");
+		log("GIF is fresh, skipping initial generation");
 		const stats = fs.statSync(getGifPath());
 		state.lastGeneration = stats.mtime;
 	}
@@ -205,7 +204,7 @@ async function main(): Promise<void> {
 	const cronJob = new CronJob(
 		CRON_SCHEDULE,
 		() => {
-			generateRadarGif().catch(console.error);
+			generateRadarGif().catch(logError);
 		},
 		null,
 		true,
@@ -214,29 +213,27 @@ async function main(): Promise<void> {
 
 	// Update next generation time
 	state.nextGeneration = cronJob.nextDate().toJSDate();
-	console.log(
-		`Next scheduled generation: ${state.nextGeneration.toISOString()}`,
-	);
+	log(`Next scheduled generation: ${state.nextGeneration.toISOString()}`);
 
 	// Start HTTP server
 	const server = http.createServer(handleRequest);
 
 	server.listen(PORT, () => {
-		console.log(`Server listening on http://localhost:${PORT}`);
-		console.log("Endpoints:");
-		console.log("  GET  /           - Serve radar GIF");
-		console.log("  GET  /radar.gif  - Serve radar GIF (alias)");
-		console.log("  GET  /health     - Health check");
-		console.log("  GET  /status     - Detailed status");
-		console.log("  POST /refresh    - Trigger regeneration");
+		log(`Server listening on http://localhost:${PORT}`);
+		log("Endpoints:");
+		log("  GET  /           - Serve radar GIF");
+		log("  GET  /radar.gif  - Serve radar GIF (alias)");
+		log("  GET  /health     - Health check");
+		log("  GET  /status     - Detailed status");
+		log("  POST /refresh    - Trigger regeneration");
 	});
 
 	// Handle shutdown gracefully
 	const shutdown = (): void => {
-		console.log("\nShutting down...");
+		log("\nShutting down...");
 		cronJob.stop();
 		server.close(() => {
-			console.log("Server closed");
+			log("Server closed");
 			process.exit(0);
 		});
 	};
@@ -246,6 +243,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((error) => {
-	console.error("Fatal error:", error);
+	logError("Fatal error:", error);
 	process.exit(1);
 });

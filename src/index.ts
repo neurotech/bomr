@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import * as ftp from "basic-ftp";
 import sharp from "sharp";
+import { log } from "./log";
 
 const BOM_FTP_HOST = "ftp.bom.gov.au";
 const RADAR_PATH = "/anon/gen/radar";
@@ -31,11 +32,11 @@ async function withFtpClient<T>(
 	const client = new ftp.Client();
 	try {
 		await client.access({ host: BOM_FTP_HOST, secure: false });
-		console.log(`Connected to ${BOM_FTP_HOST}`);
+		log(`Connected to ${BOM_FTP_HOST}`);
 		return await fn(client);
 	} finally {
 		client.close();
-		console.log("Disconnected from FTP server");
+		log("Disconnected from FTP server");
 	}
 }
 
@@ -54,7 +55,7 @@ async function downloadBackgrounds(
 		if (!fs.existsSync(localPath)) {
 			const remotePath = `${TRANSPARENCIES_PATH}/${fileName}`;
 			await client.downloadTo(localPath, remotePath);
-			console.log(`Downloaded background: ${fileName}`);
+			log(`Downloaded background: ${fileName}`);
 		}
 	}
 }
@@ -90,13 +91,13 @@ async function downloadRadarFrames(
 		.sort((a, b) => a.name.localeCompare(b.name))
 		.slice(-MAX_FRAMES);
 
-	console.log(`Found ${pngFiles.length} radar frames (limited to latest ${MAX_FRAMES})`);
+	log(`Found ${pngFiles.length} radar frames (limited to latest ${MAX_FRAMES})`);
 
 	for (const file of pngFiles) {
 		const remotePath = `${RADAR_PATH}/${file.name}`;
 		const localPath = path.join(DOWNLOADS_DIR, file.name);
 		await client.downloadTo(localPath, remotePath);
-		console.log(`Downloaded: ${file.name}`);
+		log(`Downloaded: ${file.name}`);
 	}
 }
 
@@ -134,11 +135,11 @@ async function createGif(
 		.sort();
 
 	if (files.length === 0) {
-		console.log("No radar images found");
+		log("No radar images found");
 		return null;
 	}
 
-	console.log(`Creating GIF from ${files.length} frames...`);
+	log(`Creating GIF from ${files.length} frames...`);
 
 	const bgMetadata = await sharp(backgroundPath).metadata();
 	if (!bgMetadata.width || !bgMetadata.height) {
@@ -146,7 +147,7 @@ async function createGif(
 	}
 	const { width, height } = bgMetadata;
 
-	console.log("Compositing frames...");
+	log("Compositing frames...");
 	const compositedFrames: Buffer[] = [];
 	for (const file of files) {
 		const radarPath = path.join(DOWNLOADS_DIR, file);
@@ -175,7 +176,7 @@ async function createGif(
 		.gif({ delay: Array(files.length).fill(delay), loop: 0 })
 		.toFile(outputPath);
 
-	console.log(`Created: ${outputPath}`);
+	log(`Created: ${outputPath}`);
 	return outputPath;
 }
 
