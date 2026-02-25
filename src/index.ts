@@ -59,6 +59,8 @@ async function downloadBackgrounds(
 	}
 }
 
+const MAX_FRAMES = 6;
+
 async function downloadRadarFrames(
 	client: ftp.Client,
 	stationId: string,
@@ -77,15 +79,18 @@ async function downloadRadarFrames(
 
 	const files = await client.list(RADAR_PATH);
 
-	const pngFiles = files.filter(
-		(f) =>
-			f.type === ftp.FileType.File &&
-			f.name.startsWith(stationId) &&
-			f.name.endsWith(".png") &&
-			!f.name.endsWith(".tmp"),
-	);
+	const pngFiles = files
+		.filter(
+			(f) =>
+				f.type === ftp.FileType.File &&
+				f.name.startsWith(stationId) &&
+				f.name.endsWith(".png") &&
+				!f.name.endsWith(".tmp"),
+		)
+		.sort((a, b) => a.name.localeCompare(b.name))
+		.slice(-MAX_FRAMES);
 
-	console.log(`Found ${pngFiles.length} radar frames`);
+	console.log(`Found ${pngFiles.length} radar frames (limited to latest ${MAX_FRAMES})`);
 
 	for (const file of pngFiles) {
 		const remotePath = `${RADAR_PATH}/${file.name}`;
